@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17251f">
+<title>Private Sales Ledger</title>
+<style>
+:root{--bg:#f4f6f3;--card:#fff;--ink:#18231e;--muted:#68756e;--line:#e3e9e4;--green:#244c3b;--soft:#eaf1ec;--red:#a13d36}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#17251f;color:white;padding:25px 20px 22px}header .eyebrow{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;opacity:.7}h1{font-size:27px;margin:8px 0 5px}header p{margin:0;color:#c7d3cc;font-size:13px}
+main{max-width:1000px;margin:auto;padding:18px 14px 40px}.topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}.month{font-size:19px;font-weight:700}.small{font-size:12px;color:var(--muted)}
+button,.filebtn{border:0;border-radius:10px;padding:11px 14px;background:var(--green);color:#fff;font-weight:650;font-size:13px;cursor:pointer}.secondary{background:var(--soft);color:var(--green)}.danger{background:#faeeec;color:var(--red)}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px}.stat .label{font-size:11px;color:var(--muted)}.stat .value{font-size:20px;font-weight:750;margin-top:7px;overflow-wrap:anywhere}.stat.profit .value{color:var(--green)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}.panel h2{font-size:16px;margin:0 0 14px}.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:6px}.field input{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font:inherit;min-width:0}.form-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.shipping-note{margin-top:12px;padding:10px 12px;background:var(--soft);border-radius:9px;font-size:12px;color:var(--green)}
+.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:800px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:12px;white-space:nowrap}th{color:var(--muted);font-weight:650;background:#fafcfb}td.money,th.money{text-align:right}.positive{color:var(--green);font-weight:700}.negative{color:var(--red);font-weight:700}.actions{display:flex;gap:6px}.actions button{padding:7px 9px;font-size:11px}.empty{text-align:center;color:var(--muted);padding:30px 10px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.toolbar input{padding:9px;border:1px solid var(--line);border-radius:9px;min-width:0;flex:1}
+footer{font-size:11px;color:var(--muted);text-align:center;padding:18px 4px;line-height:1.6}
+@media(max-width:650px){.cards{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:repeat(2,1fr)}header{padding:22px 16px}main{padding:14px 10px 30px}.stat .value{font-size:18px}}
+@media(max-width:390px){.formgrid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">Personal business tracker</div><h1>Sales & Profit Ledger</h1><p>Your monthly order book · Standard shipping ₹600</p></header>
+<main>
+ <div class="topbar"><div><div class="month" id="monthTitle">November 2026</div><div class="small">Ledger starts 4 November 2026</div></div><div class="toolbar"><input type="month" id="monthPicker" value="2026-11" aria-label="Choose month"><button class="secondary" id="backupBtn">Backup all data</button><button class="secondary" id="restoreBtn">Restore backup</button><input id="restoreFile" type="file" accept="application/json,.json" hidden><button class="secondary" id="exportBtn">Export CSV</button></div></div>
+ <section class="cards">
+  <div class="stat"><div class="label">Total sales</div><div class="value" id="salesTotal">₹0</div></div>
+  <div class="stat"><div class="label">Product cost</div><div class="value" id="costTotal">₹0</div></div>
+  <div class="stat"><div class="label">Shipping expense</div><div class="value" id="shippingTotal">₹0</div></div>
+  <div class="stat profit"><div class="label">Net profit</div><div class="value" id="profitTotal">₹0</div></div>
+ </section>
+ <section class="panel">
+  <h2 id="formTitle">Add an order</h2>
+  <form id="orderForm">
+   <div class="formgrid">
+    <div class="field"><label for="date">Order date</label><input id="date" type="date" value="2026-11-04" required></div>
+    <div class="field"><label for="product">Product name</label><input id="product" placeholder="e.g. Sunglasses" required></div>
+    <div class="field"><label for="seller">Seller / supplier</label><input id="seller" placeholder="Seller name"></div>
+    <div class="field"><label for="client">Client / customer</label><input id="client" placeholder="Client name"></div>
+    <div class="field"><label for="cost">Cost price (₹)</label><input id="cost" type="number" min="0" step="0.01" placeholder="0.00" required></div>
+    <div class="field"><label for="selling">Selling price (₹)</label><input id="selling" type="number" min="0" step="0.01" placeholder="0.00" required></div>
+   </div>
+   <div class="shipping-note">Standard shipping is fixed at ₹600 per order and is deducted when calculating profit. You can change this later if needed.</div>
+   <div class="form-actions"><button type="submit" id="saveBtn">Add to ledger</button><button type="button" class="secondary" id="resetBtn">Clear</button></div>
+  </form>
+ </section>
+ <section class="panel">
+  <div class="topbar"><div><h2 style="margin:0">Orders</h2><div class="small" id="orderCount">0 orders</div></div><div class="toolbar"><input id="search" placeholder="Search product, seller or client…" aria-label="Search orders"></div></div>
+  <div class="tablewrap"><table><thead><tr><th>Date</th><th>Product</th><th>Seller</th><th>Client</th><th class="money">Cost</th><th class="money">Selling</th><th class="money">Shipping</th><th class="money">Profit</th><th>Manage</th></tr></thead><tbody id="ordersBody"></tbody></table><div id="empty" class="empty">No orders yet. Add your first November order above.</div></div>
+ </section>
+ <footer>Data is saved in this browser on this device using local storage. It is not synced across devices and is not password-protected. Use Export CSV regularly to keep a backup. Avoid entering sensitive personal or payment details.</footer>
+</main>
+<script>
+const SHIPPING=600, KEY='private_sales_ledger_v1';
+let orders=[]; try{orders=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){orders=[]}
+let editingId=null;
+const $=id=>document.getElementById(id);
+const rupees=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const month=()=> $('monthPicker').value;
+function persist(){localStorage.setItem(KEY,JSON.stringify(orders))}
+function visibleOrders(){const m=month(),q=$('search').value.trim().toLowerCase();return orders.filter(o=>o.date.startsWith(m)&&[o.product,o.seller,o.client].join(' ').toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date))}
+function render(){
+ const m=month(); const all=orders.filter(o=>o.date.startsWith(m));
+ const sales=all.reduce((s,o)=>s+o.selling,0),cost=all.reduce((s,o)=>s+o.cost,0),ship=all.reduce((s,o)=>s+o.shipping,0),profit=sales-cost-ship;
+ $('monthTitle').textContent=new Date(m+'-02T00:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+ $('salesTotal').textContent=rupees(sales);$('costTotal').textContent=rupees(cost);$('shippingTotal').textContent=rupees(ship);$('profitTotal').textContent=rupees(profit);
+ const list=visibleOrders();$('orderCount').textContent=list.length+' order'+(list.length===1?'':'s');$('empty').style.display=list.length?'none':'block';
+ $('ordersBody').innerHTML=list.map(o=>`<tr><td>${esc(o.date)}</td><td><b>${esc(o.product)}</b></td><td>${esc(o.seller||'—')}</td><td>${esc(o.client||'—')}</td><td class="money">${rupees(o.cost)}</td><td class="money">${rupees(o.selling)}</td><td class="money">${rupees(o.shipping)}</td><td class="money ${o.selling-o.cost-o.shipping>=0?'positive':'negative'}">${rupees(o.selling-o.cost-o.shipping)}</td><td><div class="actions"><button class="secondary" onclick="editOrder('${o.id}')">Edit</button><button class="danger" onclick="deleteOrder('${o.id}')">Delete</button></div></td></tr>`).join('');
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function clearForm(){editingId=null;$('orderForm').reset();$('date').value=month()==='2026-11'?'2026-11-04':month()+'-01';$('formTitle').textContent='Add an order';$('saveBtn').textContent='Add to ledger'}
+$('orderForm').addEventListener('submit',e=>{e.preventDefault();const record={id:editingId||String(Date.now()),date:$('date').value,product:$('product').value.trim(),seller:$('seller').value.trim(),client:$('client').value.trim(),cost:Number($('cost').value),selling:Number($('selling').value),shipping:SHIPPING};if(editingId){orders=orders.map(o=>o.id===editingId?record:o)}else orders.push(record);persist();clearForm();render()});
+$('resetBtn').onclick=clearForm;
+$('monthPicker').onchange=render;$('search').oninput=render;
+window.editOrder=id=>{const o=orders.find(x=>x.id===id);if(!o)return;editingId=id;$('date').value=o.date;$('product').value=o.product;$('seller').value=o.seller;$('client').value=o.client;$('cost').value=o.cost;$('selling').value=o.selling;$('formTitle').textContent='Edit order';$('saveBtn').textContent='Save changes';window.scrollTo({top:0,behavior:'smooth'})};
+window.deleteOrder=id=>{if(confirm('Delete this order from your ledger?')){orders=orders.filter(o=>o.id!==id);persist();render();if(editingId===id)clearForm()}};
+
+$('backupBtn').onclick=()=>{
+ const payload={app:'Private Sales & Profit Ledger',version:1,exportedAt:new Date().toISOString(),orders};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+ a.download='sales-ledger-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ a.click();URL.revokeObjectURL(a.href);
+};
+$('restoreBtn').onclick=()=>$('restoreFile').click();
+$('restoreFile').onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{
+  const parsed=JSON.parse(await file.text());
+  const incoming=Array.isArray(parsed)?parsed:parsed.orders;
+  if(!Array.isArray(incoming)||!incoming.every(o=>o&&typeof o.date==='string'&&typeof o.product==='string'&&Number.isFinite(Number(o.cost))&&Number.isFinite(Number(o.selling)))){
+   throw new Error('This file does not look like a valid ledger backup.');
+  }
+  const normalized=incoming.map(o=>({id:String(o.id||Date.now()+Math.random()),date:o.date,product:o.product,seller:String(o.seller||''),client:String(o.client||''),cost:Number(o.cost),selling:Number(o.selling),shipping:Number.isFinite(Number(o.shipping))?Number(o.shipping):SHIPPING}));
+  if(!confirm('Restore '+normalized.length+' orders? This will replace the orders currently saved in this browser. Export a backup first if you want to keep the current data.'))return;
+  orders=normalized;persist();clearForm();render();alert('Backup restored successfully.');
+ }catch(err){alert(err.message||'Could not read that backup file.');}
+ finally{e.target.value='';}
+};
+
+$('exportBtn').onclick=()=>{const rows=[['Date','Product','Seller','Client','Cost Price','Selling Price','Shipping','Profit'],...orders.filter(o=>o.date.startsWith(month())).map(o=>[o.date,o.product,o.seller,o.client,o.cost,o.selling,o.shipping,o.selling-o.cost-o.shipping])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sales-ledger-'+month()+'.csv';a.click();URL.revokeObjectURL(a.href)};
+render();
+</script>
+</body></html>
